@@ -1,0 +1,56 @@
+# AVSA CI/CD security gate — example.
+#
+# Runs AVSA's full six-module + two-chain scan against a target and FAILS
+# the build if anything is found. This is the opt-in gate added in
+# avsa/run_all.py: AVSA_FAIL_ON_FINDING is unset everywhere else in this
+# repo (manual runs, the GUI, the DVAI regression/demo scan), because
+# against DVAI finding everything is success, not a failure. This workflow
+# is the one place that flag is deliberately turned on, because here AVSA
+# is standing in for its intended real use: pointed at a deployment you are
+# trying to PROTECT, where a confirmed finding should block the release.
+#
+# Manual-trigger only (workflow_dispatch) rather than wired to push/PR: it
+# needs a live target to scan (AVSA_BASE_URL) and a funded OpenAI key on
+# that target's side for the LLM-layer modules, neither of which belongs
+# hard-coded into a report-submission repo. Enable the "on: push" trigger
+# and add the secrets below once pointed at a real staging deployment.
+
+name: AVSA Security Gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "Base URL of the deployment to scan"
+        required: true
+        default: "http://127.0.0.1:5000"
+
+jobs:
+  avsa-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install AVSA dependencies
+        run: pip install -r avsa/requirements.txt
+
+      - name: Run AVSA full scan (gate the build on any finding)
+        env:
+          AVSA_BASE_URL: ${{ github.event.inputs.target_url }}
+          AVSA_USER: ${{ secrets.AVSA_SCAN_USER }}
+          AVSA_PASS: ${{ secrets.AVSA_SCAN_PASS }}
+          AVSA_FAIL_ON_FINDING: "1"
+        run: python -m avsa.run_all
+
+      - name: Upload AVSA report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: avsa-report
+          path: |
+            output/report.md
+            output/findings.json
