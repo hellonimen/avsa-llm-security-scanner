@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %} — Register{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Create an account</h1>
+  <p class="muted">Takes a few seconds — no email required.</p>
+  <form method="post" action="{{ url_for('register') }}">
+    <label>Username
+      <input type="text" name="username" required autofocus>
+    </label>
+    <label>Display name <span class="hint">(optional)</span>
+      <input type="text" name="display_name">
+    </label>
+    <label>Password
+      <input type="password" name="password" required>
+    </label>
+    <button type="submit">Register</button>
+  </form>
+  <p class="muted">Already have an account? <a href="{{ url_for('login') }}">Log in</a>.</p>
+</section>
+{% endblock %}

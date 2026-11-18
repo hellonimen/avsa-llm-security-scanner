@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %} — Chat{% endblock %}
+{% block content %}
+<section class="chat-layout{% if embed %} chat-layout--embed{% endif %}">
+
+  {% if not embed %}<aside class="sidebar">
+    <h2>Your chats</h2>
+    {% if chats %}
+      <ul class="chatlist">
+        {% for c in chats %}
+          <li{% if active_chat and c['id'] == active_chat['id'] %} class="active"{% endif %}>
+            <a href="{{ url_for('chat_history', chat_id=c['id']) }}">
+              {{ c['title'] or 'Untitled' }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No chats yet. Send a message to start one.</p>
+    {% endif %}
+    <a class="newchat" href="{{ url_for('chat', new=1) }}">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      New chat
+    </a>
+  </aside>{% endif %}
+
+  <div class="conversation">
+    <div class="conv-head">
+      <span class="dot" aria-hidden="true"></span>
+      {{ active_chat['title'] if active_chat and active_chat['title'] else 'New conversation' }}
+    </div>
+    <div class="messages" id="messages">
+      {% if messages %}
+        {% for m in messages %}
+          <div class="message {{ m['role'] }}">
+            <span class="role">{{ m['role'] }}</span>
+            {# VULNERABLE BY DESIGN (DVAI_SPEC §4.3) — Stored XSS. `| safe` disables
+               Jinja autoescaping, so stored HTML/JS in a message executes in the
+               browser. This same sink also renders assistant replies unsanitised
+               (Insecure Output Handling, §4.6) — the bridge for Chain 1. Do NOT escape. #}
+            <div class="content">{{ m['content'] | safe }}</div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="muted empty">Start the conversation below.</p>
+      {% endif %}
+    </div>
+
+    <form method="post" action="{{ url_for('chat_send') }}" class="composer" id="composer-form">
+      {% if active_chat %}
+        <input type="hidden" name="chat_id" value="{{ active_chat['id'] }}">
+      {% endif %}
+      {% if embed %}<input type="hidden" name="embed" value="{{ embed }}">{% endif %}
+      <input type="text" name="content" placeholder="Type a message…" autocomplete="off" required autofocus>
+      <button type="submit">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 11L21 3L13 21L11 13L3 11Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <span class="send-label">Send</span>
+      </button>
+    </form>
+    <script>
+      // Submit-lock: a slow LLM reply with no "sending" feedback made it easy to
+      // press Enter/Send more than once while waiting. Each extra submit had no
+      // chat_id yet (first message in a new chat), so chat_send() treated every
+      // one as a separate new chat -- not a security issue, just noisy duplicate
+      // chats. This purely disables the button + swaps the label after the first
+      // submit; it does not change what is sent or how the server handles it.
+      (function () {
+        var form = document.getElementById("composer-form");
+        if (!form) return;
+        form.addEventListener("submit", function () {
+          var btn = form.querySelector('button[type="submit"]');
+          if (!btn || btn.disabled) return;
+          btn.disabled = true;
+          var label = btn.querySelector(".send-label");
+          if (label) label.textContent = "Sending…";
+        });
+      })();
+    </script>
+  </div>
+
+</section>
+{% endblock %}

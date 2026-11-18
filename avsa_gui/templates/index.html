@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVSA - Automated Vulnerability Scanner &amp; Assessor</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="wrap">
+  <header class="page-header">
+    <svg class="logo-mark" width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="8" width="8" height="8" rx="2.4" stroke="currentColor" stroke-width="1.6"/>
+      <rect x="14" y="8" width="8" height="8" rx="2.4" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M10 12h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      <circle class="logo-token" cx="12" cy="12" r="2.2"/>
+    </svg>
+    <div>
+      <h1>AVSA <span class="tag">// Scanner</span></h1>
+      <p>Automated Security Assessment of LLM-Integrated Web Applications &mdash; cross-layer attack chain detection.</p>
+    </div>
+  </header>
+
+  {% if error %}
+  <div class="banner error"><span class="icon">&#9888;</span><span>{{ error }}</span></div>
+  {% endif %}
+
+  {% if last_run %}
+  <div class="banner info">
+    <span class="lr-label">Last run</span>
+    <span class="n">{{ last_run.summary.findings_present }}/{{ last_run.summary.findings_total }}</span> present &middot;
+    <span class="n">{{ last_run.summary.chains_asserted }}/{{ last_run.summary.chains_total }}</span> chains asserted &middot;
+    <span class="lr-label mono">{{ last_run.run_id }}</span> &middot;
+    <span class="lr-label">{{ last_run.timestamp }}</span>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <form method="POST" action="{{ url_for('scan') }}"
+          onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').textContent = 'Running scan...'; document.getElementById('running-hint').style.display = 'block';">
+      <div class="config-row">
+        <div>
+          <label class="label" for="base_url">Target <span class="ping-status" id="ping-status-base_url"><span class="ping-dot"></span><span class="ping-text">checking&hellip;</span></span></label>
+          <input class="cfg-input mono" type="text" id="base_url" name="base_url" value="{{ config.base_url }}" placeholder="http://127.0.0.1:5000" autocomplete="off" oninput="avsaSchedulePing('base_url')">
+        </div>
+        <div>
+          <label class="label" for="username">User</label>
+          <input class="cfg-input mono" type="text" id="username" name="username" value="{{ config.username }}" placeholder="(uses AVSA_USER default)" autocomplete="off">
+        </div>
+        <div>
+          <label class="label" for="password">Password</label>
+          <input class="cfg-input mono" type="password" id="password" name="password" placeholder="(uses AVSA_PASS default)" autocomplete="off">
+        </div>
+      </div>
+      <button type="submit" class="run-btn">&#9654; Run Full Scan</button>
+    </form>
+    <p class="hint" id="running-hint" style="display:none;">This runs synchronously and can take a minute or two (the LLM-layer modules retry several times to account for non-determinism) &mdash; the page will load the results when the scan finishes. Don't close this tab.</p>
+    <p class="hint">Editing Target/User/Password above applies to this scan only &mdash; it doesn't change the AVSA_BASE_URL/AVSA_USER/AVSA_PASS defaults shown next time this page loads.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step"><div class="n">01</div><div class="t">Log in</div><div class="d">Authenticates as the configured user against the target above.</div></div>
+    <div class="step"><div class="n">02</div><div class="t">Run 6 detection modules</div><div class="d">LLM layer first (leakage, injection, insecure output), then web layer (SQLi, IDOR, XSS).</div></div>
+    <div class="step"><div class="n">03</div><div class="t">Correlate cross-layer chains</div><div class="d">Asserts whether Chain 1 and Chain 2 hold, with full custody evidence.</div></div>
+  </div>
+
+  <div class="compare-cta">
+    <a href="{{ url_for('compare_form') }}" class="btn ghost">&#8644; Compare two targets (Build&rarr;Break&rarr;Defend)</a>
+  </div>
+
+  <footer class="page-footer">
+    {% if last_run %}
+      <a href="{{ url_for('download_report_md') }}" class="mono">&#8595; Download Report (.md)</a>
+      &middot;
+      <a href="{{ url_for('download_findings_json') }}" class="mono">&#8595; Download Findings (.json)</a>
+    {% else %}
+      AVSA &mdash; Automated Vulnerability Scanner &amp; Assessor
+    {% endif %}
+  </footer>
+</div>
+<script src="{{ url_for('static', filename='ping.js') }}"></script>
+<script src="{{ url_for('static', filename='dvai_widget.js') }}" data-dvai-url="{{ dvai_base_url }}"></script>
+</body>
+</html>

@@ -1,0 +1,392 @@
+:root {
+  --bg: #100b16;
+  --bg-grid: rgba(200,107,255,0.035);
+  --panel: #1a1422;
+  --panel-2: #15101c;
+  --panel-border: #33293f;
+  --text: #ece7f5;
+  --muted: #8d80a3;
+  --accent: #c86bff;
+  --accent-2: #22d3b8;
+  --danger: #ff5c7a;
+  --danger-bg: rgba(255,92,122,0.10);
+  --critical: #ff2d68;
+  --ok: #3ddc84;
+  --ok-bg: rgba(61,220,132,0.12);
+  --warn: #ffb454;
+  --token: #ffd60a; /* the shared taint-token proof - logo dot, connector label, chain-token value ONLY */
+  --mono: "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  --shadow: 0 8px 30px rgba(0,0,0,0.35);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(900px 400px at 15% -10%, rgba(200,107,255,0.10), transparent 60%),
+    radial-gradient(700px 350px at 100% 0%, rgba(34,211,184,0.08), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.55;
+}
+body::before {
+  content: "";
+  position: fixed; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(var(--bg-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,0.6), transparent 70%);
+  z-index: 0;
+}
+
+.wrap { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 44px 20px 64px; }
+.mono { font-family: var(--mono); }
+
+header.page-header {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 30px; padding-bottom: 22px;
+  border-bottom: 1px solid var(--panel-border);
+}
+.logo-mark { flex: none; color: var(--accent); filter: drop-shadow(0 0 10px rgba(200,107,255,0.45)); }
+header.page-header h1 { margin: 0 0 4px; font-size: 26px; letter-spacing: 0.3px; font-weight: 700; }
+header.page-header h1 .tag { color: var(--accent); font-weight: 400; }
+header.page-header p { margin: 0; color: var(--muted); font-size: 13.5px; }
+
+.card {
+  position: relative;
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 24px 26px;
+  margin-bottom: 22px;
+  box-shadow: var(--shadow);
+}
+
+.config-row { display: flex; gap: 20px; flex-wrap: wrap; font-size: 14px; margin-bottom: 20px; }
+.config-row div { flex: 1 1 190px; min-width: 170px; }
+.config-row div span.label,
+.config-row div label.label {
+  display: block; color: var(--muted); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px;
+}
+.config-row div span.value { font-family: var(--mono); font-size: 14.5px; }
+.config-row input.cfg-input {
+  width: 100%; font-size: 14.5px; background: var(--panel-2);
+  border: 1px solid var(--panel-border); border-radius: 7px; color: var(--text);
+  padding: 8px 10px;
+}
+.config-row input.cfg-input:focus { outline: none; border-color: var(--accent); }
+.config-row input.cfg-input::placeholder { color: var(--muted); opacity: 0.7; }
+
+button.run-btn, a.btn {
+  display: inline-flex; align-items: center; gap: 9px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #140a1f; border: none; font-weight: 700; font-size: 15px;
+  padding: 13px 24px; border-radius: 9px; cursor: pointer; text-decoration: none;
+  box-shadow: 0 6px 22px rgba(200,107,255,0.28);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+button.run-btn:disabled { opacity: 0.6; cursor: default; box-shadow: none; }
+button.run-btn:not(:disabled):hover, a.btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
+a.btn.ghost {
+  background: none; box-shadow: none; color: var(--accent);
+  border: 1px solid var(--panel-border);
+}
+.compare-cta { text-align: center; margin: 4px 0 28px; }
+
+.hint { color: var(--muted); font-size: 13px; margin-top: 12px; }
+
+.banner { border-radius: 10px; padding: 14px 18px; margin-bottom: 22px; font-size: 14px; box-shadow: var(--shadow); }
+.banner.error {
+  background: var(--danger-bg); border: 1px solid rgba(255,92,122,0.4); border-left: 3px solid var(--danger);
+  color: #ffc2ce; display: flex; gap: 12px; align-items: flex-start;
+}
+.banner.error .icon { flex: none; color: var(--danger); font-size: 16px; line-height: 1.4; }
+.banner.info {
+  background: var(--panel-2); border: 1px solid var(--panel-border); border-left: 3px solid var(--accent);
+  color: var(--text); display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-size: 13.5px;
+}
+.banner.info .lr-label { color: var(--muted); }
+.banner.info .n { font-family: var(--mono); font-weight: 700; color: var(--accent); }
+
+.steps { display: flex; gap: 14px; margin-bottom: 22px; flex-wrap: wrap; }
+.step {
+  flex: 1 1 220px; background: var(--panel-2); border: 1px solid var(--panel-border);
+  border-left: 3px solid var(--accent); border-radius: 10px; padding: 14px 16px;
+}
+.step .n { font-family: var(--mono); color: var(--accent); font-size: 12px; letter-spacing: 1px; }
+.step .t { font-size: 13.5px; margin-top: 4px; color: var(--text); font-weight: 600; }
+.step .d { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+/* --- hero: gauge + stat + layer bars --- */
+.hero-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 22px; }
+@media (max-width: 820px) { .hero-grid { grid-template-columns: 1fr; } }
+.hero-card { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.hero-card .hc-title { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
+.gauge-wrap { position: relative; width: 120px; height: 120px; }
+.gauge-wrap .gauge-num { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.gauge-wrap .gauge-num .v { font-size: 24px; font-weight: 700; font-family: var(--mono); }
+.gauge-wrap .gauge-num .l { font-size: 9px; color: var(--muted); letter-spacing: 0.5px; margin-top: 2px; }
+
+.stat-big { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 120px; }
+.stat-big .v { font-size: 44px; font-weight: 800; font-family: var(--mono); line-height: 1; }
+.stat-big .v.danger { color: var(--danger); }
+.stat-big .v.clean { color: var(--ok); }
+.stat-big .l { color: var(--muted); font-size: 12px; margin-top: 8px; }
+
+.layer-bars { width: 100%; display: flex; flex-direction: column; justify-content: center; gap: 16px; height: 120px; }
+.layer-row { display: grid; grid-template-columns: 70px 1fr 46px; align-items: center; gap: 10px; font-size: 12.5px; }
+.layer-name { color: var(--muted); text-align: left; }
+.bar-track { height: 8px; background: var(--panel-border); border-radius: 999px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--danger)); }
+.layer-count { font-family: var(--mono); text-align: right; }
+
+/* --- pipeline strip --- */
+.pipeline-group-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; margin: 4px 0 10px; }
+.pipeline { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+.pipeline-node {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--panel-2); border: 1px solid var(--panel-border); border-radius: 999px;
+  padding: 7px 14px 7px 8px; font-size: 12.5px;
+}
+.pipeline-node .dot { width: 8px; height: 8px; border-radius: 999px; flex: none; }
+.pipeline-node .dot.present { background: var(--danger); box-shadow: 0 0 8px rgba(255,92,122,0.7); }
+.pipeline-node .dot.clean { background: var(--ok); }
+
+/* --- icon badges --- */
+.icon-badge {
+  display: flex; align-items: center; justify-content: center; flex: none;
+  width: 34px; height: 34px; border-radius: 10px;
+  background: var(--panel-2); border: 1px solid var(--panel-border); color: var(--accent);
+}
+.icon-badge svg { width: 60%; height: 60%; }
+.icon-badge.lg { width: 50px; height: 50px; border-radius: 14px; }
+.icon-badge.sev-critical { color: var(--critical); border-color: rgba(255,45,104,0.35); background: rgba(255,45,104,0.10); }
+.icon-badge.sev-high { color: var(--danger); border-color: rgba(255,92,122,0.35); background: var(--danger-bg); }
+.icon-badge.sev-medium { color: var(--warn); border-color: rgba(255,180,84,0.35); background: rgba(255,180,84,0.10); }
+.icon-badge.sev-low { color: var(--accent); border-color: rgba(200,107,255,0.35); background: rgba(200,107,255,0.10); }
+
+/* --- severity / owasp pills --- */
+.pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.3px; }
+.pill.present-yes { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(255,92,122,0.3); }
+.pill.present-no { background: var(--ok-bg); color: var(--ok); border: 1px solid rgba(61,220,132,0.3); }
+.pill.sev-critical { background: rgba(255,45,104,0.14); color: var(--critical); border: 1px solid rgba(255,45,104,0.35); }
+.pill.sev-high { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(255,92,122,0.3); }
+.pill.sev-medium { background: rgba(255,180,84,0.14); color: var(--warn); border: 1px solid rgba(255,180,84,0.3); }
+.pill.sev-low { background: rgba(200,107,255,0.14); color: var(--accent); border: 1px solid rgba(200,107,255,0.3); }
+.pill.owasp { background: var(--panel-2); color: var(--muted); border: 1px solid var(--panel-border); font-weight: 600; }
+
+h2.section-title {
+  font-size: 17px; margin: 40px 0 16px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--panel-border);
+  display: flex; align-items: center; gap: 8px; color: var(--text);
+}
+
+/* --- findings grid (replaces table + separate detail list) --- */
+.findings-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+@media (max-width: 780px) { .findings-grid { grid-template-columns: 1fr; } }
+.finding-card { padding: 18px 20px; }
+.finding-card .fc-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+.finding-card .fc-head .fc-title { flex: 1; }
+.finding-card h3 { margin: 0; font-size: 15px; }
+.finding-card .fc-id { color: var(--muted); font-size: 11px; }
+.finding-card .fc-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.finding-card .explainer { color: var(--muted); font-size: 13px; margin: 8px 0 4px; }
+.finding-card .meta { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+.finding-card .meta .mono { color: var(--text); }
+.finding-card details { margin-top: 10px; }
+.finding-card details summary {
+  cursor: pointer; color: var(--accent); font-size: 12.5px; font-weight: 600;
+  list-style: none;
+}
+.finding-card details summary::-webkit-details-marker { display: none; }
+.finding-card details summary::before { content: "▸ "; }
+.finding-card details[open] summary::before { content: "▾ "; }
+
+dl.evidence { margin: 10px 0 0; }
+dl.evidence dt { font-family: var(--mono); color: var(--accent); font-size: 12px; margin-top: 8px; }
+dl.evidence dd { margin: 2px 0 0; font-size: 12.5px; color: var(--text); word-break: break-word; }
+dl.evidence dd details summary { color: var(--muted); font-weight: 400; }
+
+.finding-card .guidance {
+  margin-top: 12px; padding: 10px 12px; border-left: 3px solid var(--accent-2);
+  background: rgba(255,255,255,0.03); border-radius: 0 6px 6px 0;
+  font-size: 12.5px; color: var(--text); line-height: 1.5;
+}
+.finding-card .guidance strong { color: var(--accent-2); }
+.finding-card .guidance .hint { display: block; margin-top: 4px; }
+
+/* --- chain flow diagram --- */
+.chain-card.asserted { border-color: rgba(255,92,122,0.45); background: linear-gradient(180deg, rgba(255,92,122,0.07), var(--panel-2)); }
+.chain-card .status { font-weight: 700; font-size: 13px; margin-bottom: 4px; letter-spacing: 0.4px; }
+.chain-card.asserted .status { color: var(--danger); }
+.chain-card:not(.asserted) .status { color: var(--muted); }
+.chain-card .chain-sub { color: var(--muted); font-size: 12.5px; margin-bottom: 4px; }
+.chain-token {
+  display: inline-flex; align-items: center; gap: 6px; margin: 10px 0 4px;
+  font-size: 12px; padding: 4px 10px; border-radius: 999px;
+  background: var(--panel-2); border: 1px solid var(--panel-border); color: var(--muted);
+}
+.chain-token .mono { color: var(--token); }
+
+.chain-flow { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin: 18px 0 6px; }
+.chain-node {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px;
+  width: 116px; padding: 12px 8px; border-radius: 12px;
+  background: var(--panel-2); border: 1px solid var(--panel-border);
+}
+.chain-node .label { font-size: 11.5px; text-transform: capitalize; line-height: 1.3; }
+.chain-node.manual { border-style: dashed; }
+.chain-node.manual .label { color: var(--muted); }
+.chain-connector { flex: 1 1 28px; min-width: 18px; max-width: 46px; height: 2px; background: var(--danger); position: relative; }
+.chain-connector::after {
+  content: ""; position: absolute; right: -1px; top: 50%; transform: translateY(-50%);
+  border: 5px solid transparent; border-left-color: var(--danger);
+}
+.chain-connector.weak { background: repeating-linear-gradient(90deg, var(--muted), var(--muted) 5px, transparent 5px, transparent 10px); }
+.chain-connector.weak::after { border-left-color: var(--muted); }
+
+/* --- chain-flow node tinting by layer (violet=LLM / teal=Web) - the
+   two-layer duotone IS the cross-layer concept the chain is proving, not
+   decoration. Only used inside .chain-flow; the findings-grid above still
+   colours icon-badges by SEVERITY (.sev-critical etc, unchanged) - these
+   are deliberately two different axes and never overlap on screen. --- */
+.icon-badge.layer-llm { color: var(--accent); border-color: rgba(200,107,255,0.35); background: rgba(200,107,255,0.10); }
+.icon-badge.layer-web { color: var(--accent-2); border-color: rgba(34,211,184,0.35); background: rgba(34,211,184,0.10); }
+
+.not-asserted-row { display: flex; align-items: center; gap: 14px; margin: 14px 0; }
+.not-asserted-row .icon-badge { color: var(--muted); }
+.not-asserted-row .reason { color: var(--muted); font-size: 13px; }
+
+/* --- custody timeline --- */
+.timeline { list-style: none; margin: 14px 0 0; padding: 0; }
+.timeline li { display: flex; gap: 12px; padding-bottom: 14px; position: relative; }
+.timeline li:not(:last-child)::before {
+  content: ""; position: absolute; left: 11px; top: 26px; bottom: -2px; width: 1px; background: var(--panel-border);
+}
+.timeline .tl-num {
+  flex: none; width: 23px; height: 23px; border-radius: 999px; background: var(--panel-2);
+  border: 1px solid var(--panel-border); color: var(--accent); font-family: var(--mono); font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+}
+.timeline .tl-text { font-size: 13px; padding-top: 2px; }
+
+.falsifiability {
+  margin-top: 14px; font-size: 12.5px; color: var(--muted);
+  border-left: 2px solid var(--panel-border); padding-left: 10px;
+}
+
+footer.page-footer { margin-top: 36px; font-size: 12.5px; color: var(--muted); text-align: center; }
+footer.page-footer a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted currentColor; }
+footer.page-footer a:hover { color: var(--accent-2); }
+
+/* --- connector token label (the actual shared-token proof, on the ONE
+   connector that carries it - see app.py's _token_connector_index) --- */
+.connector-token {
+  position: absolute; top: -21px; left: 50%; transform: translateX(-50%);
+  font-size: 9.5px; color: var(--token); background: var(--panel-2);
+  border: 1px solid rgba(255,214,10,0.35); border-radius: 999px;
+  padding: 2px 7px; white-space: nowrap; letter-spacing: 0.2px;
+}
+
+/* --- evidence: expandable dict values (mirrors the string/list pattern) --- */
+dl.evidence pre {
+  margin: 6px 0 0; padding: 10px 12px; background: var(--panel-2);
+  border: 1px solid var(--panel-border); border-radius: 8px;
+  font-size: 11.5px; white-space: pre-wrap; word-break: break-word; overflow-x: auto;
+}
+
+/* --- small icon badge, for compact table rows --- */
+.icon-badge.sm { width: 26px; height: 26px; border-radius: 8px; display: inline-flex; vertical-align: middle; margin-right: 8px; }
+
+/* --- before/after comparison table --- */
+table.cmp-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.cmp-table th {
+  text-align: left; color: var(--muted); font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.5px; padding: 8px 10px; border-bottom: 1px solid var(--panel-border);
+}
+table.cmp-table td { padding: 10px; border-bottom: 1px solid var(--panel-border); vertical-align: middle; }
+table.cmp-table tr:last-child td { border-bottom: none; }
+table.cmp-table tr.changed { background: rgba(255,180,84,0.08); }
+.pill.changed-pill { background: rgba(255,180,84,0.14); color: var(--warn); border: 1px solid rgba(255,180,84,0.35); }
+
+
+/* --- logo: two layers + shared token (the actual chain-correlation proof,
+   miniaturised) - mirrors .chain-node/.chain-connector rather than a
+   generic shield icon --- */
+.logo-mark .logo-token {
+  fill: var(--token);
+  transform-box: fill-box; transform-origin: center;
+  animation: avsa-pulse 2.2s ease-in-out infinite;
+}
+@keyframes avsa-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(1.3); }
+}
+
+/* --- live target reachability dot, next to a Target field's label --- */
+.ping-status {
+  display: inline-flex; align-items: center; gap: 5px; margin-left: 8px;
+  font-size: 10px; text-transform: none; letter-spacing: 0;
+  vertical-align: middle; white-space: nowrap;
+}
+.ping-status .ping-dot { width: 7px; height: 7px; border-radius: 999px; flex: none; background: var(--muted); }
+.ping-status .ping-text { color: var(--muted); }
+.ping-status.checking .ping-dot { background: var(--warn); animation: avsa-pulse 1s ease-in-out infinite; }
+.ping-status.online .ping-dot { background: var(--ok); box-shadow: 0 0 6px rgba(61,220,132,0.7); }
+.ping-status.online .ping-text { color: var(--ok); }
+.ping-status.offline .ping-dot { background: var(--danger); }
+.ping-status.offline .ping-text { color: var(--danger); }
+
+/* --- DVAI chat widget (dvai_widget.js) -- a launcher bubble + panel fixed
+   bottom-right on every AVSA GUI page. The bubble/panel chrome uses AVSA's
+   own palette (it lives on AVSA's page), the icon inside is DVAI's own
+   chat-bubble mark -- signalling "AVSA's page, DVAI inside". --- */
+.dvai-widget-launcher {
+  position: fixed; right: 24px; bottom: 24px; z-index: 999;
+  width: 56px; height: 56px; border-radius: 999px; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #140a1f; box-shadow: 0 8px 26px rgba(200,107,255,0.35);
+  transition: transform 0.15s ease;
+}
+.dvai-widget-launcher:hover { transform: scale(1.06); }
+.dvai-widget-launcher.open { transform: rotate(90deg) scale(0.94); }
+
+.dvai-widget-panel {
+  position: fixed; right: 24px; bottom: 92px; z-index: 998;
+  width: 380px; height: 580px; max-height: 70vh;
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 16px;
+  box-shadow: var(--shadow); overflow: hidden;
+  display: flex; flex-direction: column;
+  opacity: 0; transform: translateY(16px) scale(0.98); pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.dvai-widget-panel.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+
+.dvai-widget-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; border-bottom: 1px solid var(--panel-border);
+  background: var(--panel-2); flex: none;
+}
+.dvai-widget-title { font-size: 13.5px; font-weight: 700; color: var(--text); }
+.dvai-widget-actions { display: flex; align-items: center; gap: 12px; }
+.dvai-widget-fullsite { font-size: 11.5px; color: var(--accent); text-decoration: none; }
+.dvai-widget-fullsite:hover { text-decoration: underline; }
+.dvai-widget-close {
+  background: none; border: none; color: var(--muted); font-size: 20px; line-height: 1;
+  cursor: pointer; padding: 0 2px;
+}
+.dvai-widget-close:hover { color: var(--text); }
+
+.dvai-widget-frame { flex: 1; border: none; width: 100%; background: #0a0e17; }
+
+@media (max-width: 480px) {
+  .dvai-widget-panel { width: calc(100vw - 32px); right: 16px; bottom: 84px; }
+  .dvai-widget-launcher { right: 16px; bottom: 16px; }
+}

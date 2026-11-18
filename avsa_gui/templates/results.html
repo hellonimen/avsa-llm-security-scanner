@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVSA - Scan Results ({{ data.run_id }})</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="wrap">
+  <header class="page-header">
+    <svg class="logo-mark" width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="8" width="8" height="8" rx="2.4" stroke="currentColor" stroke-width="1.6"/>
+      <rect x="14" y="8" width="8" height="8" rx="2.4" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M10 12h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      <circle class="logo-token" cx="12" cy="12" r="2.2"/>
+    </svg>
+    <div>
+      <h1>AVSA <span class="tag">// Scan Results</span></h1>
+      <p>run_id <span class="mono">{{ data.run_id }}</span> &middot; target {{ data.target }} &middot; user {{ data.user }} &middot; {{ data.timestamp }}</p>
+    </div>
+  </header>
+
+  <div class="hero-grid">
+    <div class="card hero-card">
+      <div class="hc-title">Vulnerabilities present</div>
+      <div class="gauge-wrap">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <defs>
+            <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#3ddc84"/>
+              <stop offset="100%" stop-color="#ff5c7a"/>
+            </linearGradient>
+          </defs>
+          <circle cx="60" cy="60" r="{{ gauge.r }}" fill="none" stroke="#33293f" stroke-width="10"/>
+          <circle cx="60" cy="60" r="{{ gauge.r }}" fill="none" stroke="url(#gaugeGrad)" stroke-width="10"
+                  stroke-linecap="round"
+                  stroke-dasharray="{{ gauge.dash }} {{ gauge.circumference }}"
+                  transform="rotate(-90 60 60)"/>
+        </svg>
+        <div class="gauge-num">
+          <span class="v">{{ data.summary.findings_present }}/{{ data.summary.findings_total }}</span>
+          <span class="l">FINDINGS</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card hero-card">
+      <div class="hc-title">Cross-layer chains asserted</div>
+      <div class="stat-big">
+        <span class="v {{ 'danger' if data.summary.chains_asserted else 'clean' }}">{{ data.summary.chains_asserted }}/{{ data.summary.chains_total }}</span>
+        <span class="l">the novel contribution</span>
+      </div>
+    </div>
+
+    <div class="card hero-card" style="align-items: stretch;">
+      <div class="hc-title" style="text-align:left;">Findings by layer</div>
+      <div class="layer-bars">
+        <div class="layer-row">
+          <span class="layer-name">LLM</span>
+          <div class="bar-track"><div class="bar-fill" style="width: {{ layer_summary.llm.pct }}%;"></div></div>
+          <span class="layer-count mono">{{ layer_summary.llm.present }}/{{ layer_summary.llm.total }}</span>
+        </div>
+        <div class="layer-row">
+          <span class="layer-name">Web</span>
+          <div class="bar-track"><div class="bar-fill" style="width: {{ layer_summary.web.pct }}%;"></div></div>
+          <span class="layer-count mono">{{ layer_summary.web.present }}/{{ layer_summary.web.total }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="pipeline-group-label">01&ndash;03 &middot; LLM layer (runs first)</div>
+    <div class="pipeline">
+      {% for f in data.findings[:3] %}
+      <div class="pipeline-node">
+        <span class="dot {{ 'present' if f.present else 'clean' }}"></span>
+        {{ f.name }}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="pipeline-group-label">04&ndash;06 &middot; Web layer</div>
+    <div class="pipeline">
+      {% for f in data.findings[3:] %}
+      <div class="pipeline-node">
+        <span class="dot {{ 'present' if f.present else 'clean' }}"></span>
+        {{ f.name }}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <h2 class="section-title">Findings</h2>
+  <div class="findings-grid">
+    {% for f in data.findings %}
+    <div class="card finding-card">
+      <div class="fc-head">
+        <div class="icon-badge {{ f.severity_class }}">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">{{ f.icon|safe }}</svg>
+        </div>
+        <div class="fc-title">
+          <h3>{{ f.name }}</h3>
+          <div class="fc-id mono">{{ f.id }} &middot; {{ f.layer_label }}</div>
+          <div class="fc-badges">
+            <span class="pill {{ 'present-yes' if f.present else 'present-no' }}">{{ 'PRESENT' if f.present else 'clean' }}</span>
+            <span class="pill {{ f.severity_class }}">{{ f.severity }}</span>
+            <span class="pill owasp">{{ f.owasp }}</span>
+            {% if f.attempts %}<span class="pill owasp mono">landed {{ f.attempts }}</span>{% endif %}
+          </div>
+        </div>
+      </div>
+      <p class="explainer">{{ f.explainer }}</p>
+      {% if f.primitives %}<div class="meta">primitives: <span class="mono">{{ f.primitives | join(', ') }}</span></div>{% endif %}
+      <details>
+        <summary>Evidence</summary>
+        {% if not f.evidence %}
+          <p class="hint">(no evidence captured)</p>
+        {% else %}
+          <dl class="evidence">
+            {% for key, value in f.evidence.items() %}
+              <dt>{{ key }}</dt>
+              <dd>
+                {% if value is string and value|length > 220 %}
+                  {{ value[:220] }}&hellip;
+                  <details><summary>show full value</summary>{{ value }}</details>
+                {% elif value is mapping %}
+                  dict with keys: {{ value.keys() | join(', ') }}
+                  {% if value %}<details><summary>show full value</summary><pre class="mono">{{ value | tojson(indent=2) }}</pre></details>{% endif %}
+                {% elif value is sequence and value is not string %}
+                  [{{ value | length }} item(s)]
+                  {% if value %}<details><summary>show items</summary>{{ value | join(', ') }}</details>{% endif %}
+                {% else %}
+                  {{ value }}
+                {% endif %}
+              </dd>
+            {% endfor %}
+          </dl>
+        {% endif %}
+      </details>
+      {% if f.general_guidance %}
+        <div class="guidance">
+          <strong>General guidance:</strong> {{ f.general_guidance }}
+          <span class="hint">Chapter 6 of the dissertation discusses this in full.</span>
+        </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <h2 class="section-title">Cross-layer chains</h2>
+  {% for c in chains_display %}
+  <div class="card chain-card {{ 'asserted' if c.asserted else '' }}">
+    <div class="status">{{ 'ASSERTED' if c.asserted else 'NOT ASSERTED' }}</div>
+    <div class="chain-sub">{{ c.name }}</div>
+
+    {% if not c.asserted %}
+      <div class="not-asserted-row">
+        <div class="icon-badge">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">{{ broken_link_icon|safe }}</svg>
+        </div>
+        <div class="reason">{{ c.reason }}</div>
+      </div>
+    {% else %}
+      {% if c.shared_artifact %}
+      <div class="chain-token">linked by shared token <span class="mono">{{ c.shared_artifact }}</span></div>
+      {% else %}
+      <div class="chain-token">no shared token &mdash; recon-overlap only (weaker link)</div>
+      {% endif %}
+
+      <div class="chain-flow">
+        {% for node in c.nodes %}
+          <div class="chain-node">
+            <div class="icon-badge lg layer-{{ node.layer }}">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">{{ node.icon|safe }}</svg>
+            </div>
+            <div class="label">{{ node.label }}</div>
+          </div>
+          {% if not loop.last or c.has_manual_step %}
+            <div class="chain-connector {{ '' if c.shared_artifact else 'weak' }}">
+              {% if c.shared_artifact and loop.index0 == c.token_connector_index %}
+                <span class="connector-token mono">{{ c.shared_artifact }}</span>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+        {% if c.has_manual_step %}
+          <div class="chain-node manual">
+            <div class="icon-badge lg layer-web"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">{{ manual_icon|safe }}</svg></div>
+            <div class="label">Browser execution (manual)</div>
+          </div>
+        {% endif %}
+      </div>
+
+      <ol class="timeline">
+        {% for step in c.timeline %}
+        <li><span class="tl-num">{{ step.n }}</span><span class="tl-text">{{ step.text }}</span></li>
+        {% endfor %}
+      </ol>
+      <div class="falsifiability">{{ c.falsifiability_note }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  <div class="actions-row" style="margin-top: 28px; display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+    <form method="GET" action="{{ url_for('index') }}" style="margin:0;">
+      <button type="submit" class="run-btn">Run Another Scan</button>
+    </form>
+    <a href="{{ url_for('download_findings_json') }}" class="btn">Download JSON</a>
+    <a href="{{ url_for('download_report_md') }}" class="btn">Download Report (.md)</a>
+  </div>
+
+  <footer class="page-footer">
+    Written to <span class="mono">{{ json_path }}</span> and <span class="mono">{{ md_path }}</span>.
+  </footer>
+</div>
+<script src="{{ url_for('static', filename='dvai_widget.js') }}" data-dvai-url="{{ dvai_base_url }}"></script>
+</body>
+</html>

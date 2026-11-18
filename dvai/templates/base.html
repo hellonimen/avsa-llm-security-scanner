@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DVAI{% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body{% if embed %} class="embed-mode"{% endif %}>
+  {% if not embed %}<header class="topbar">
+    <div class="brand-group">
+      <a class="brand" href="{{ url_for('index') }}">
+        <svg class="logo-mark" width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 5.5C4 4.67157 4.67157 4 5.5 4H18.5C19.3284 4 20 4.67157 20 5.5V14.5C20 15.3284 19.3284 16 18.5 16H9L5 19.5V16H5.5C4.67157 16 4 15.3284 4 14.5V5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          <circle class="logo-dot" cx="9" cy="10" r="1.1" fill="currentColor"/>
+          <circle class="logo-dot logo-dot-2" cx="12" cy="10" r="1.1" fill="currentColor"/>
+          <circle class="logo-dot logo-dot-3" cx="15" cy="10" r="1.1" fill="currentColor"/>
+        </svg>
+        DVAI
+      </a>
+      <span class="status-dot" title="Online" aria-hidden="true"></span>
+    </div>
+    <nav>
+      {% if current_user %}
+        <a href="{{ url_for('chat') }}">Chat</a>
+        <a href="{{ url_for('profile') }}">Profile</a>
+        <span class="who">{{ current_user['display_name'] }}</span>
+        <a href="{{ url_for('logout') }}">Log out</a>
+      {% else %}
+        <a href="{{ url_for('login') }}">Log in</a>
+        <a href="{{ url_for('register') }}">Register</a>
+      {% endif %}
+    </nav>
+  </header>{% endif %}
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="flashes">
+        {% for m in messages %}<li>{{ m }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVSA - Before / After Comparison</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="wrap">
+  <header class="page-header">
+    <svg class="logo-mark" width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="8" width="8" height="8" rx="2.4" stroke="currentColor" stroke-width="1.6"/>
+      <rect x="14" y="8" width="8" height="8" rx="2.4" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M10 12h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      <circle class="logo-token" cx="12" cy="12" r="2.2"/>
+    </svg>
+    <div>
+      <h1>AVSA <span class="tag">// Before / After</span></h1>
+      <p>Build &rarr; Break &rarr; Defend &mdash; run the same six modules against two targets and compare.</p>
+    </div>
+  </header>
+
+  {% if error %}
+  <div class="banner error"><span class="icon">&#9888;</span><span>{{ error }}</span></div>
+  {% endif %}
+
+  <div class="card">
+    <form method="POST" action="{{ url_for('compare_run') }}"
+          onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').textContent = 'Running both scans...'; document.getElementById('compare-running-hint').style.display = 'block';">
+      <div class="config-row">
+        <div>
+          <label class="label" for="base_url_a">Target A (before) <span class="ping-status" id="ping-status-base_url_a"><span class="ping-dot"></span><span class="ping-text">checking&hellip;</span></span></label>
+          <input class="cfg-input mono" type="text" id="base_url_a" name="base_url_a" value="{{ base_url_a }}" placeholder="http://127.0.0.1:5000" autocomplete="off" oninput="avsaSchedulePing('base_url_a')">
+        </div>
+        <div>
+          <label class="label" for="base_url_b">Target B (after) <span class="ping-status" id="ping-status-base_url_b"><span class="ping-dot"></span><span class="ping-text">checking&hellip;</span></span></label>
+          <input class="cfg-input mono" type="text" id="base_url_b" name="base_url_b" value="{{ base_url_b }}" placeholder="http://127.0.0.1:5001" autocomplete="off" oninput="avsaSchedulePing('base_url_b')">
+        </div>
+        <div>
+          <label class="label" for="username">User</label>
+          <input class="cfg-input mono" type="text" id="username" name="username" value="{{ username }}" autocomplete="off">
+        </div>
+        <div>
+          <label class="label" for="password">Password</label>
+          <input class="cfg-input mono" type="password" id="password" name="password" placeholder="(uses default)" autocomplete="off">
+        </div>
+      </div>
+      <button type="submit" class="run-btn">&#9654; Run Both &amp; Compare</button>
+    </form>
+    <p class="hint" id="compare-running-hint" style="display:none;">Running a full six-module scan against Target A, then Target B &mdash; roughly twice as long as one scan. Don't close this tab.</p>
+    <p class="hint">Both scans run exactly like <span class="mono">/scan</span> does (same six modules, same chain correlation). This view is render-only and never overwrites <span class="mono">output/findings.json</span>.</p>
+  </div>
+
+  {% if rows %}
+  <div class="hero-grid" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="card hero-card">
+      <div class="hc-title">Target A &mdash; {{ data_a.target }}</div>
+      <div class="stat-big">
+        <span class="v {{ 'danger' if data_a.summary.findings_present else 'clean' }}">{{ data_a.summary.findings_present }}/{{ data_a.summary.findings_total }}</span>
+        <span class="l">findings present &middot; {{ data_a.summary.chains_asserted }}/{{ data_a.summary.chains_total }} chains asserted</span>
+      </div>
+    </div>
+    <div class="card hero-card">
+      <div class="hc-title">Target B &mdash; {{ data_b.target }}</div>
+      <div class="stat-big">
+        <span class="v {{ 'danger' if data_b.summary.findings_present else 'clean' }}">{{ data_b.summary.findings_present }}/{{ data_b.summary.findings_total }}</span>
+        <span class="l">findings present &middot; {{ data_b.summary.chains_asserted }}/{{ data_b.summary.chains_total }} chains asserted</span>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-title">Findings &mdash; A vs B</h2>
+  <div class="card" style="overflow-x:auto;">
+    <table class="cmp-table">
+      <thead><tr><th>Finding</th><th>Layer</th><th>A</th><th>B</th><th></th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr class="{{ 'changed' if r.changed else '' }}">
+          <td><span class="icon-badge sm"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">{{ r.icon|safe }}</svg></span>{{ r.name }}</td>
+          <td class="mono" style="color:var(--muted);font-size:12px;">{{ r.layer_label }}</td>
+          <td><span class="pill {{ 'present-yes' if r.a_present else 'present-no' }}">{{ 'PRESENT' if r.a_present else 'clean' }}</span></td>
+          <td><span class="pill {{ 'present-yes' if r.b_present else 'present-no' }}">{{ 'PRESENT' if r.b_present else 'clean' }}</span></td>
+          <td>{% if r.changed %}<span class="pill changed-pill">CHANGED</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section-title">Cross-layer chains &mdash; A vs B</h2>
+  <div class="card" style="overflow-x:auto;">
+    <table class="cmp-table">
+      <thead><tr><th>Chain</th><th>A</th><th>B</th><th></th></tr></thead>
+      <tbody>
+        {% for c in chain_rows %}
+        <tr class="{{ 'changed' if c.changed else '' }}">
+          <td>{{ c.name }}</td>
+          <td><span class="pill {{ 'present-yes' if c.a_asserted else 'present-no' }}">{{ 'ASSERTED' if c.a_asserted else 'not asserted' }}</span></td>
+          <td><span class="pill {{ 'present-yes' if c.b_asserted else 'present-no' }}">{{ 'ASSERTED' if c.b_asserted else 'not asserted' }}</span></td>
+          <td>{% if c.changed %}<span class="pill changed-pill">CHANGED</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <footer class="page-footer">
+    <a href="{{ url_for('index') }}" class="mono">&larr; back to single-target scan</a>
+  </footer>
+</div>
+<script src="{{ url_for('static', filename='ping.js') }}"></script>
+<script src="{{ url_for('static', filename='dvai_widget.js') }}" data-dvai-url="{{ dvai_base_url }}"></script>
+</body>
+</html>

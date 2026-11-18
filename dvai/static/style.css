@@ -1,0 +1,249 @@
+:root {
+  --bg: #0a0e17;
+  --bg-grid: rgba(79,140,255,0.035);
+  --panel: #131a28;
+  --panel-2: #0e1420;
+  --panel-border: #232c3d;
+  --text: #e9edf5;
+  --muted: #7b879e;
+  --accent: #4f8cff;
+  --accent-2: #ff6ec7;
+  --ok: #3ddc84;
+  --border: var(--panel-border); /* legacy alias, kept for any un-migrated selector */
+  --card: var(--panel);          /* legacy alias, kept for any un-migrated selector */
+  --ink: var(--text);            /* legacy alias, kept for any un-migrated selector */
+  --mono: "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  --shadow: 0 8px 30px rgba(0,0,0,0.35);
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(900px 400px at 10% -10%, rgba(79,140,255,0.12), transparent 60%),
+    radial-gradient(700px 350px at 100% 0%, rgba(255,110,199,0.08), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.55;
+  min-height: 100%;
+}
+body::before {
+  content: "";
+  position: fixed; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(var(--bg-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,0.55), transparent 65%);
+  z-index: 0;
+}
+
+.mono { font-family: var(--mono); }
+
+/* --- topbar --- */
+.topbar {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 28px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  border-bottom: 1px solid var(--panel-border);
+}
+.topbar .brand-group { display: flex; align-items: center; gap: 10px; }
+.topbar .brand {
+  display: flex; align-items: center; gap: 9px;
+  text-decoration: none; color: var(--text); font-weight: 700; font-size: 1.15rem; letter-spacing: 0.2px;
+}
+.topbar .brand .logo-mark { color: var(--accent); filter: drop-shadow(0 0 8px rgba(79,140,255,0.45)); flex: none; }
+.topbar .brand .logo-mark .logo-dot { animation: dvai-typing 1.4s ease-in-out infinite; }
+.topbar .brand .logo-mark .logo-dot-2 { animation-delay: 0.15s; }
+.topbar .brand .logo-mark .logo-dot-3 { animation-delay: 0.3s; }
+@keyframes dvai-typing {
+  0%, 60%, 100% { opacity: 0.35; }
+  30% { opacity: 1; }
+}
+.status-dot {
+  width: 7px; height: 7px; border-radius: 999px; background: var(--ok); flex: none;
+  box-shadow: 0 0 6px rgba(61,220,132,0.7);
+  animation: dvai-pulse 2.2s ease-in-out infinite;
+}
+@keyframes dvai-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(1.35); }
+}
+.topbar nav { display: flex; align-items: center; gap: 4px; }
+.topbar nav a {
+  text-decoration: none; color: var(--muted); font-size: 0.9rem; font-weight: 600;
+  padding: 7px 13px; border-radius: 8px; transition: color 0.12s ease, background 0.12s ease;
+}
+.topbar nav a:hover { color: var(--text); background: var(--panel-2); }
+.topbar nav .who {
+  margin-left: 4px; color: var(--muted); font-size: 0.85rem;
+  padding: 7px 12px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--panel-border);
+}
+
+main { position: relative; z-index: 1; max-width: 1040px; margin: 1.75rem auto; padding: 0 1.2rem 2rem; }
+
+/* --- flash messages --- */
+.flashes { position: relative; z-index: 1; max-width: 1040px; margin: 1.2rem auto 0; padding: 0; list-style: none; }
+.flashes li {
+  padding: 12px 18px; margin: 0 1.2rem 10px; font-size: 13.5px;
+  background: var(--panel-2); border: 1px solid var(--panel-border); border-left: 3px solid var(--accent);
+  border-radius: 10px; color: var(--text); box-shadow: var(--shadow);
+}
+
+/* --- generic card (login / register / profile) --- */
+.card {
+  position: relative;
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 28px 30px;
+  max-width: 400px;
+  margin: 2.5rem auto;
+  box-shadow: var(--shadow);
+}
+.card h1 { margin: 0 0 6px; font-size: 22px; }
+.card label {
+  display: block; margin: 1.1rem 0 0; font-size: 12px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600;
+}
+.card label .hint { text-transform: none; letter-spacing: 0; font-weight: 400; }
+.card input {
+  display: block; width: 100%; margin-top: 6px; font-size: 14.5px;
+  background: var(--panel-2); border: 1px solid var(--panel-border); border-radius: 8px;
+  color: var(--text); padding: 10px 12px;
+}
+.card input:focus { outline: none; border-color: var(--accent); }
+.card button { margin-top: 1.4rem; width: 100%; }
+.card p.muted { margin-top: 1.2rem; margin-bottom: 0; font-size: 13.5px; }
+.card > p.muted:first-of-type { margin-top: 0.3rem; }
+
+button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #0a0e17; border: none; font-weight: 700; font-size: 14.5px;
+  padding: 11px 20px; border-radius: 9px; cursor: pointer; text-decoration: none;
+  box-shadow: 0 6px 20px rgba(79,140,255,0.28);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+button:hover { transform: translateY(-1px); filter: brightness(1.06); }
+button:disabled { opacity: 0.6; cursor: default; box-shadow: none; transform: none; }
+
+a { color: var(--accent); }
+.muted { color: var(--muted); }
+.hint { color: var(--muted); font-weight: normal; font-size: 0.85rem; }
+
+/* --- profile --- */
+.profile { margin: 0; }
+.profile dt { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-top: 1rem; font-weight: 600; }
+.profile dd { margin: 3px 0 0; font-size: 14.5px; font-family: var(--mono); }
+
+/* --- chat layout --- */
+.chat-layout { display: grid; grid-template-columns: 240px 1fr; gap: 18px; align-items: start; }
+.sidebar {
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--panel-border); border-radius: var(--radius);
+  padding: 18px; box-shadow: var(--shadow);
+}
+.sidebar h2 { font-size: 11px; margin: 0 0 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; }
+.chatlist { list-style: none; padding: 0; margin: 0 0 14px; display: flex; flex-direction: column; gap: 3px; }
+.chatlist li a {
+  display: block; text-decoration: none; color: var(--muted); font-size: 13.5px;
+  padding: 9px 11px; border-radius: 8px; border-left: 3px solid transparent;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.chatlist li a:hover { background: var(--panel-2); color: var(--text); }
+.chatlist li.active a { background: var(--panel-2); color: var(--text); border-left-color: var(--accent); font-weight: 600; }
+.newchat {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  text-decoration: none; font-weight: 700; font-size: 13px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #0a0e17; padding: 10px 14px; border-radius: 9px;
+  box-shadow: 0 6px 18px rgba(79,140,255,0.25);
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+.newchat:hover { transform: translateY(-1px); filter: brightness(1.06); }
+
+.conversation {
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--panel-border); border-radius: var(--radius);
+  display: flex; flex-direction: column;
+  min-height: 60vh; max-height: 75vh;
+  box-shadow: var(--shadow); overflow: hidden;
+  /* Bug fix (reviewer feedback): .messages below had overflow-y:auto but
+     .conversation had no upper bound on its height, so the flex column just
+     grew to fit every message instead of clipping — .messages never actually
+     overflowed, so it never scrolled, and main.js's "scroll to bottom on
+     load" was a silent no-op against a box that had nothing to scroll. A
+     bounded max-height here makes .messages a genuinely scrollable region,
+     so that existing scroll-to-bottom logic now does something real. */
+}
+.conv-head {
+  padding: 13px 20px; border-bottom: 1px solid var(--panel-border);
+  font-size: 12.5px; color: var(--muted); font-weight: 600;
+  display: flex; align-items: center; gap: 9px; flex: none;
+}
+.conv-head .dot { width: 6px; height: 6px; border-radius: 999px; background: var(--accent); flex: none; }
+
+.messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; }
+.messages::-webkit-scrollbar { width: 8px; }
+.messages::-webkit-scrollbar-track { background: transparent; }
+.messages::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 999px; }
+.messages::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+.message { display: flex; flex-direction: column; margin: 10px 0; max-width: 78%; }
+.message.user { align-items: flex-end; align-self: flex-end; }
+.message.assistant { align-items: flex-start; align-self: flex-start; }
+.message .role {
+  display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--muted); margin-bottom: 4px; padding: 0 4px;
+}
+.message .content {
+  display: inline-block; padding: 10px 14px; border-radius: 14px;
+  white-space: pre-wrap; word-wrap: break-word; font-size: 14.5px; line-height: 1.5;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+}
+.message.user .content {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #0a0e17; border-bottom-right-radius: 4px; font-weight: 500;
+}
+.message.assistant .content {
+  background: var(--panel-2); border: 1px solid var(--panel-border);
+  color: var(--text); border-bottom-left-radius: 4px;
+}
+.empty { margin: auto; padding: 2.5rem 1rem; text-align: center; color: var(--muted); font-size: 13.5px; }
+
+.composer { display: flex; gap: 10px; padding: 16px 18px; border-top: 1px solid var(--panel-border); flex: none; }
+.composer input {
+  flex: 1; font-size: 14.5px; background: var(--panel-2);
+  border: 1px solid var(--panel-border); border-radius: 999px; color: var(--text);
+  padding: 11px 18px;
+}
+.composer input:focus { outline: none; border-color: var(--accent); }
+.composer button { border-radius: 999px; padding: 11px 20px; }
+
+@media (max-width: 760px) {
+  .chat-layout { grid-template-columns: 1fr; }
+  .sidebar { order: 2; }
+}
+
+/* --- embed mode (rendered inside the AVSA-page chat widget's iframe, via
+   /guest?embed=1) -- hides DVAI's own topbar/sidebar since the AVSA-side
+   widget panel supplies its own header/close button, and fills the small
+   iframe instead of using vh units sized for a full browser window. Nothing
+   here changes for a normal (non-embed) visit -- it's all scoped under
+   body.embed-mode / .chat-layout--embed, only ever applied when the ?embed=1
+   flag is present. */
+body.embed-mode { overflow: hidden; }
+body.embed-mode main { max-width: none; margin: 0; padding: 0; height: 100vh; }
+body.embed-mode .flashes { max-width: none; margin: 8px 8px 0; }
+.chat-layout--embed { grid-template-columns: 1fr; height: 100%; }
+.chat-layout--embed .conversation {
+  min-height: 0; max-height: none; height: 100%; border-radius: 0; border: none;
+}
